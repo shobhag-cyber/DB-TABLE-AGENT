@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = 3000;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "YOUR_ANTHROPIC_API_KEY_HERE";
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
 const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
 async function handler(req, res) {

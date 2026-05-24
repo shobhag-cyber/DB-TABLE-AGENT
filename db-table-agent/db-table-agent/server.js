@@ -10,10 +10,8 @@ const fs = require("fs");
 const path = require("path");
 
 // ── CONFIG ─────────────────────────────────────────────────────
-const PORT = 3000;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
+const PORT = 3000;
 
-// Put your Anthropic API key here, or better: set env variable
-// export ANTHROPIC_API_KEY=sk-ant-...
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
 const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
