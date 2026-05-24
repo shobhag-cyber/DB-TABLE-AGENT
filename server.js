@@ -21,10 +21,7 @@ async function handler(req, res) {
     req.on("data", (chunk) => (body += chunk));
     req.on("end", async () => {
       try {
-        console.log("Raw body received:", body);
         const parsed = JSON.parse(body);
-        console.log("Parsed body:", JSON.stringify(parsed));
-
         const emails = parsed.emails || [];
         const databaseFilter = parsed.databaseFilter || "";
 
@@ -47,11 +44,24 @@ async function handler(req, res) {
           : "Return results for all databases found.";
 
         const claudeResp = await callClaude(emailText, filterInstruction);
+        console.log("Claude full response:", JSON.stringify(claudeResp));
+
+        // Handle Claude API errors
+        if (claudeResp.error) {
+          return jsonResponse(res, 500, { error: "Claude API error: " + claudeResp.error.message });
+        }
+
+        if (!claudeResp.content || !Array.isArray(claudeResp.content)) {
+          return jsonResponse(res, 500, { error: "Unexpected Claude response: " + JSON.stringify(claudeResp) });
+        }
+
         const raw = claudeResp.content
           .map((b) => b.text || "")
           .join("")
           .replace(/```json|```/g, "")
           .trim();
+
+        console.log("Raw Claude text:", raw);
 
         const result = JSON.parse(raw);
         const totalSorted = result.databases.reduce((a, d) => a + (d.sorted || 0), 0);
