@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
+  "schema_version": "v2.2",
+  "name_for_human": "DB Table Email Scanner",
+  "name_for_model": "DBTableScanner",
+  "description_for_human": "Scans Outlook emails and extracts sorted/unsorted table counts per database.",
+  "description_for_model": "Use this plugin when the user asks about database table information from their emails. It reads recent emails and returns structured data about how many sorted and unsorted tables exist per database.",
+
+  "functions": [
+    {
+      "name": "scanInboxForDBTables",
+      "description": "Reads the user's recent Outlook emails and extracts database names along with their sorted and unsorted table counts. Returns a JSON list of databases with counts.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "database_name": {
+            "type": "string",
+            "description": "Optional. Filter results to a specific database name. If not provided, returns all databases found."
+          },
+          "email_count": {
+            "type": "integer",
+            "description": "Number of recent emails to scan. Defaults to 20. Maximum 50.",
+            "default": 20
+          }
+        },
+        "required": []
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "databases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name":      { "type": "string",  "description": "Database name" },
+                "sorted":    { "type": "integer", "description": "Number of sorted/indexed tables" },
+                "unsorted":  { "type": "integer", "description": "Number of unsorted/unindexed tables" },
+                "total":     { "type": "integer", "description": "Total tables mentioned" },
+                "source":    { "type": "string",  "description": "Which email(s) mentioned this database" }
+              }
+            }
+          },
+          "total_emails_scanned": { "type": "integer" },
+          "summary": { "type": "string", "description": "Plain-text summary suitable for display" }
+        }
+      }
+    }
+  ],
+
+  "runtimes": [
+    {
+      "type": "OpenApi",
+      "auth": { "type": "None" },
+      "spec": { "url": "openapi.yaml" },
+      "run_for_functions": ["scanInboxForDBTables"]
+    }
+  ]
+}

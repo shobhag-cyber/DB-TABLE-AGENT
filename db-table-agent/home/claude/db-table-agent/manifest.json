@@ -1,0 +1,107 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "db-table-agent-unique-id-replace-me",
+  "name": {
+    "short": "DB Table Agent",
+    "full": "Database Table Summary Agent"
+  },
+  "description": {
+    "short": "Scans emails for DB table info",
+    "full": "Scans your Outlook inbox for emails mentioning databases, then summarises how many sorted and unsorted tables exist per database. Also available as a Microsoft 365 Copilot agent."
+  },
+  "icons": {
+    "color": "assets/color.png",
+    "outline": "assets/outline.png"
+  },
+  "accentColor": "#0F6E56",
+  "developer": {
+    "name": "Your Name",
+    "websiteUrl": "https://yourwebsite.com",
+    "privacyUrl": "https://yourwebsite.com/privacy",
+    "termsOfUseUrl": "https://yourwebsite.com/terms"
+  },
+
+  "extensions": [
+    {
+      "requirements": {
+        "scopes": ["mail"],
+        "capabilities": [
+          { "name": "Mailbox", "minVersion": "1.1" }
+        ]
+      },
+      "runtimes": [
+        {
+          "requirements": {
+            "capabilities": [{ "name": "Mailbox", "minVersion": "1.1" }]
+          },
+          "id": "TaskPaneRuntime",
+          "type": "general",
+          "code": { "page": "taskpane.html" },
+          "lifetime": "short",
+          "actions": [
+            {
+              "id": "openTaskPane",
+              "type": "openPage",
+              "pinnable": false,
+              "view": "dashboard"
+            },
+            {
+              "id": "scanEmails",
+              "type": "executeFunction",
+              "displayName": "Scan emails for DB table info"
+            }
+          ]
+        }
+      ],
+      "ribbons": [
+        {
+          "contexts": ["mailRead"],
+          "tabs": [
+            {
+              "builtInTabId": "TabDefault",
+              "groups": [
+                {
+                  "id": "dbAgentGroup",
+                  "label": "DB Table Agent",
+                  "icons": [
+                    { "size": 16, "url": "assets/icon-16.png" },
+                    { "size": 32, "url": "assets/icon-32.png" },
+                    { "size": 80, "url": "assets/icon-80.png" }
+                  ],
+                  "controls": [
+                    {
+                      "id": "openDBAgentButton",
+                      "type": "button",
+                      "label": "Scan emails",
+                      "supertip": {
+                        "title": "DB Table Agent",
+                        "description": "Scans your inbox and summarises sorted and unsorted tables per database."
+                      },
+                      "icons": [
+                        { "size": 16, "url": "assets/icon-16.png" },
+                        { "size": 32, "url": "assets/icon-32.png" },
+                        { "size": 80, "url": "assets/icon-80.png" }
+                      ],
+                      "actionId": "openTaskPane"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "DBTableCopilotAgent",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  }
+}

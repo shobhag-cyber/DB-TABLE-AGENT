@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DB Table Agent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", sans-serif; font-size: 14px; background: #fff; color: #1a1a1a; padding: 16px; }
+    h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .sub { font-size: 12px; color: #666; margin-bottom: 16px; }
+    button {
+      width: 100%; padding: 10px; background: #0F6E56; color: #fff;
+      border: none; border-radius: 6px; font-size: 14px; cursor: pointer; margin-bottom: 12px;
+    }
+    button:hover { background: #085041; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    #status { font-size: 12px; color: #666; margin-bottom: 12px; min-height: 18px; }
+    #error { color: #c0392b; font-size: 12px; margin-bottom: 12px; display: none; background: #fdf0ef; padding: 8px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    th { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e0e0e0; font-weight: 600; color: #444; font-size: 11px; text-transform: uppercase; }
+    td { padding: 6px 8px; border-bottom: 0.5px solid #f0f0f0; }
+    .sorted-val { color: #0F6E56; font-weight: 600; }
+    .unsorted-val { color: #993C1D; font-weight: 600; }
+    .totals td { border-top: 1px solid #ccc; font-weight: 600; background: #f9f9f9; }
+    .email-area { background: #f7f7f7; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: #333; }
+    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+    .copy-btn { width: auto; padding: 5px 12px; font-size: 11px; background: #444; margin-bottom: 6px; }
+    .results { display: none; }
+  </style>
+</head>
+<body>
+  <h1>DB Table Agent</h1>
+  <p class="sub">Scans your inbox and shows sorted vs unsorted table counts per database.</p>
+
+  <button id="scanBtn" onclick="scanEmails()">Scan my emails</button>
+  <div id="status"></div>
+  <div id="error"></div>
+
+  <div class="results" id="resultsSection">
+    <div class="section-label">Results by database</div>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Database</th>
+          <th>Sorted</th>
+          <th>Unsorted</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+
+    <div class="section-label">Summary email (ready to send)</div>
+    <button class="copy-btn" onclick="copyEmail()">Copy email</button>
+    <div class="email-area" id="emailDraft"></div>
+  </div>
+
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="taskpane.js"></script>
+</body>
+</html>

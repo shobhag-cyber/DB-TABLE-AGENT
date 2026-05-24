@@ -1,0 +1,61 @@
+openapi: 3.0.1
+info:
+  title: DB Table Email Scanner API
+  description: API that reads Outlook emails via Microsoft Graph and extracts database table information using Claude AI.
+  version: 1.0.0
+
+servers:
+  - url: https://YOUR-BACKEND-URL.azurewebsites.net/api
+    description: Your deployed backend (Azure Functions or any HTTPS server)
+
+paths:
+  /scan-emails:
+    post:
+      operationId: scanInboxForDBTables
+      summary: Scan inbox emails for database table information
+      description: Reads the user's recent Outlook emails and extracts database names with sorted/unsorted table counts.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                database_name:
+                  type: string
+                  description: Optional filter for a specific database name
+                email_count:
+                  type: integer
+                  description: Number of emails to scan (default 20, max 50)
+                  default: 20
+      responses:
+        "200":
+          description: Successful response with database table counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  databases:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        sorted:
+                          type: integer
+                        unsorted:
+                          type: integer
+                        total:
+                          type: integer
+                        source:
+                          type: string
+                  total_emails_scanned:
+                    type: integer
+                  summary:
+                    type: string
+        "401":
+          description: Unauthorised - user needs to sign in
+        "500":
+          description: Server error

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "version": "1.0.0",
+  "id": "00000000-0000-0000-0000-000000000001",
+  "developer": {
+    "name": "Your Name",
+    "websiteUrl": "https://localhost:3000",
+    "privacyUrl": "https://localhost:3000/privacy",
+    "termsOfUseUrl": "https://localhost:3000/terms"
+  },
+  "name": {
+    "short": "DB Table Agent",
+    "full": "Database Table Summary Agent for Outlook"
+  },
+  "description": {
+    "short": "Scans emails and summarises sorted vs unsorted DB tables.",
+    "full": "An AI-powered agent that reads your Outlook inbox, finds database table reports, and produces a single summary showing sorted and unsorted table counts per database."
+  },
+  "icons": {
+    "color": "assets/color.png",
+    "outline": "assets/outline.png"
+  },
+  "accentColor": "#0F6E56",
+  "localizationInfo": {
+    "defaultLanguageTag": "en-us"
+  },
+
+  "extensions": [
+    {
+      "requirements": {
+        "scopes": ["mail"],
+        "capabilities": [
+          { "name": "Mailbox", "minVersion": "1.1" }
+        ]
+      },
+      "runtimes": [
+        {
+          "requirements": {
+            "capabilities": [
+              { "name": "Mailbox", "minVersion": "1.1" }
+            ]
+          },
+          "id": "TaskPaneRuntime",
+          "type": "general",
+          "code": {
+            "page": "https://localhost:3000/taskpane.html"
+          },
+          "lifetime": "short",
+          "actions": [
+            {
+              "id": "ScanEmails",
+              "type": "openPage",
+              "view": "TaskPaneView"
+            }
+          ]
+        },
+        {
+          "id": "CommandsRuntime",
+          "type": "general",
+          "code": {
+            "page": "https://localhost:3000/commands.html"
+          },
+          "lifetime": "short",
+          "actions": [
+            {
+              "id": "ScanAndSummarize",
+              "type": "executeFunction",
+              "displayName": "Scan & Summarize DB Tables"
+            }
+          ]
+        }
+      ],
+      "ribbons": [
+        {
+          "contexts": ["mailRead"],
+          "tabs": [
+            {
+              "builtInTabId": "TabDefault",
+              "groups": [
+                {
+                  "id": "DBTableGroup",
+                  "label": "DB Table Agent",
+                  "icons": [
+                    { "size": 16, "file": "assets/outline.png" },
+                    { "size": 32, "file": "assets/color.png" },
+                    { "size": 80, "file": "assets/color.png" }
+                  ],
+                  "controls": [
+                    {
+                      "id": "OpenTaskPane",
+                      "type": "button",
+                      "label": "Scan Emails",
+                      "icons": [
+                        { "size": 16, "file": "assets/outline.png" },
+                        { "size": 32, "file": "assets/color.png" },
+                        { "size": 80, "file": "assets/color.png" }
+                      ],
+                      "supertip": {
+                        "title": "Scan Emails for DB Tables",
+                        "description": "Opens the DB Table Agent panel to scan your inbox and summarise sorted vs unsorted table counts."
+                      },
+                      "actionId": "ScanEmails"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "copilotAgents": {
+    "declarativeAgents": [
+      {
+        "id": "DBTableSummaryAgent",
+        "file": "declarativeAgent.json"
+      }
+    ]
+  }
+}
