@@ -1,5 +1,5 @@
-const https = require("https");
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 
@@ -44,31 +44,40 @@ async function handler(req, res) {
 function callClaude(emailText, filterInstruction) {
   const payload = JSON.stringify({
     model: CLAUDE_MODEL, max_tokens: 1000,
-    system: `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.\n\nSORTED keywords: sorted, indexed, ordered, organised, structured, partitioned\nUNSORTED keywords: unsorted, unindexed, unordered, unorganised, raw, unpartitioned\n\n${filterInstruction}\n\nRespond ONLY with valid JSON:\n{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}`,
+    system: `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
+SORTED keywords: sorted, indexed, ordered, organised, structured, partitioned
+UNSORTED keywords: unsorted, unindexed, unordered, unorganised, raw, unpartitioned
+${filterInstruction}
+Respond ONLY with valid JSON:
+{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}`,
     messages: [{ role: "user", content: `Analyse these emails:\n\n${emailText}` }],
   });
 
   return new Promise((resolve, reject) => {
-    const req = https.request({
+    const reqNode = https.request({
       hostname: "api.anthropic.com", path: "/v1/messages", method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "Content-Length": Buffer.byteLength(payload) },
-    }, (res) => {
+    }, (resNode) => {
       let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => { try { resolve(JSON.parse(data)); } catch (e) { reject(new Error("Failed to parse Claude response: " + data)); } });
+      resNode.on("data", (chunk) => (data += chunk));
+      resNode.on("end", () => { try { resolve(JSON.parse(data)); } catch (e) { reject(new Error("Failed to parse Claude response: " + data)); } });
     });
-    req.on("error", reject);
-    req.write(payload);
-    req.end();
+    reqNode.on("error", reject);
+    reqNode.write(payload);
+    reqNode.end();
   });
 }
 
 function serveStatic(req, res, url) {
   const staticMap = {
+    "/": path.join(__dirname, "src/taskpane/taskpane.html"),
     "/taskpane.html": path.join(__dirname, "src/taskpane/taskpane.html"),
     "/taskpane.js":   path.join(__dirname, "src/taskpane/taskpane.js"),
     "/commands.html": path.join(__dirname, "src/commands/commands.html"),
-    "/commands.js":   path.join(__dirname, "src/commands/commands.js"),
+    "/commands.js": path.join(__dirname, "src/commands/commands.js"),
+    "/assets/color.png": path.join(__dirname, "assets/color.png"),
+    "/assets/outline.png": path.join(__dirname, "assets/outline.png"),
+    "/openapi.yaml": path.join(__dirname, "openapi.yaml"),
   };
   const filePath = staticMap[url.pathname];
   if (!filePath || !fs.existsSync(filePath)) { res.writeHead(404); res.end("Not found: " + url.pathname); return; }
@@ -82,9 +91,9 @@ function jsonResponse(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
-// Always use HTTP in Codespaces — GitHub handles HTTPS termination
+// Force HTTP — Codespaces handles HTTPS termination automatically
 http.createServer(handler).listen(PORT, () => {
-  console.log(`\n✅ DB Table Agent server running on port ${PORT}`);
-  console.log(`   Task pane → http://localhost:${PORT}/taskpane.html`);
-  console.log(`   API scan  → http://localhost:${PORT}/api/scan\n`);
+  console.log(`\n✅ DB Table Agent running on port ${PORT}`);
+  console.log(`   Open: http://localhost:${PORT}/taskpane.html\n`);
 });
+// patch handled above

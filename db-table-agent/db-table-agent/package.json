@@ -1,0 +1,16 @@
+{
+  "name": "db-table-agent",
+  "version": "1.0.0",
+  "description": "Outlook add-in + Microsoft 365 Copilot declarative agent for database table summarisation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "install-cert": "npx office-addin-dev-certs install",
+    "sideload": "npx office-addin-debugging start appPackage/manifest.json outlook web"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "office-addin-dev-certs": "^1.0.0",
+    "office-addin-debugging": "^1.0.0"
+  }
+}

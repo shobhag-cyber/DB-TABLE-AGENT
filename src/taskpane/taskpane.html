@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DB Table Agent</title>
+  <style>
+    body { font-family: Segoe UI, sans-serif; padding: 16px; }
+    button { width:100%; padding:10px; background:#0F6E56; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-bottom:12px; }
+    #status { font-size:12px; color:#666; margin-bottom:12px; }
+    #error { color:red; font-size:12px; display:none; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th,td { padding:6px 8px; border-bottom:1px solid #eee; text-align:left; }
+    .results { display:none; }
+  </style>
+</head>
+<body>
+  <h2>DB Table Agent</h2>
+  <p style="font-size:12px;color:#666;margin-bottom:16px">Scans your inbox for database table reports.</p>
+  <button id="scanBtn" onclick="scanEmails()">Scan my emails</button>
+  <div id="status"></div>
+  <div id="error"></div>
+  <div class="results" id="resultsSection">
+    <table>
+      <thead><tr><th>Database</th><th>Sorted</th><th>Unsorted</th><th>Total</th></tr></thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+    <pre id="emailDraft" style="margin-top:16px;background:#f7f7f7;padding:12px;font-size:12px;"></pre>
+  </div>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="taskpane.js"></script>
+</body>
+</html>

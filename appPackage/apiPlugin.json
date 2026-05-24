@@ -1,0 +1,56 @@
+{
+  "$schema": "https://aka.ms/json-schemas/copilot/plugin/v2.2/schema.json",
+  "schema_version": "v2.2",
+  "name_for_human": "DB Table Scanner",
+  "description_for_human": "Scans Outlook emails and returns sorted/unsorted table counts per database.",
+  "description_for_model": "Use this action when the user wants to scan their Outlook inbox for database table reports. Returns a structured JSON object with database names and their sorted/unsorted table counts extracted from email content.",
+  "functions": [
+    {
+      "name": "ScanAndSummarize",
+      "description": "Reads the user's Outlook inbox, finds emails that mention database tables, and returns a summary of sorted vs unsorted table counts per database.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number",
+            "description": "How many days back to scan emails. Default is 7."
+          },
+          "databaseFilter": {
+            "type": "string",
+            "description": "Optional: filter results to only a specific database name. Leave empty to return all databases."
+          }
+        },
+        "required": []
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "databases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "sorted": { "type": "number" },
+                "unsorted": { "type": "number" },
+                "source": { "type": "string" }
+              }
+            }
+          },
+          "totalSorted": { "type": "number" },
+          "totalUnsorted": { "type": "number" },
+          "emailsScanned": { "type": "number" }
+        }
+      }
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "LocalPlugin",
+      "spec": {
+        "local_endpoint": "https://db-table-agent.onrender.com/openapi.yaml"
+      },
+      "run_for_functions": ["ScanAndSummarize"]
+    }
+  ]
+}
