@@ -10,11 +10,11 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="DB Table Agent"/>
   <Description DefaultValue="Scans emails for database table reports."/>
-  <IconUrl DefaultValue="https://organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev/assets/color.png"/>
-  <HighResolutionIconUrl DefaultValue="https://organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev/assets/color.png"/>
-  <SupportUrl DefaultValue="https://organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev"/>
+  <IconUrl DefaultValue="https://db-table-agent.onrender.com/assets/color.png"/>
+  <HighResolutionIconUrl DefaultValue="https://db-table-agent.onrender.com/assets/color.png"/>
+  <SupportUrl DefaultValue="https://db-table-agent.onrender.com"/>
   <AppDomains>
-    <AppDomain>organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev</AppDomain>
+    <AppDomain>db-table-agent.onrender.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -27,7 +27,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev/taskpane.html"/>
+        <SourceLocation DefaultValue="https://db-table-agent.onrender.com/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>

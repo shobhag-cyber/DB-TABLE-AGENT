@@ -4,7 +4,7 @@
 // Store your Anthropic API key in your backend (server.js).
 // The task pane calls YOUR local backend, which proxies to Claude.
 // This keeps your API key off the client entirely.
-const BACKEND_URL = "https://localhost:3000/api/scan";
+const BACKEND_URL = "https://db-table-agent.onrender.com/api/scan";
 
 // ── OFFICE INIT ────────────────────────────────────────────────
 Office.onReady(function () {
