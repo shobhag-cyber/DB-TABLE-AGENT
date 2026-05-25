@@ -26,34 +26,28 @@ async function handler(req, res) {
 
         if (!emails.length) {
           return jsonResponse(res, 200, {
-            databases: [],
-            totalSorted: 0,
-            totalUnsorted: 0,
+            tables: [],
+            totalInSync: 0,
+            totalOutOfSync: 0,
             emailsScanned: 0,
             summaryEmail: "No emails found."
           });
         }
 
         const emailText = emails
-          .map((e) => `Subject: ${e.subject}\n${e.bodyPreview}`)
+          .map((e) => `Subject: ${e.subject}\nBody: ${e.bodyPreview}`)
           .join("\n\n---\n\n");
 
-        const filterInstruction = databaseFilter
-          ? `Only return results for database: "${databaseFilter}".`
-          : "Return results for all databases found.";
-
-        const text = await callGroq(emailText, filterInstruction);
+        const text = await callGroq(emailText, databaseFilter);
         console.log("Groq response:", text);
 
         const raw = text.replace(/```json|```/g, "").trim();
         const result = JSON.parse(raw);
-        const totalSorted = result.databases.reduce((a, d) => a + (d.sorted || 0), 0);
-        const totalUnsorted = result.databases.reduce((a, d) => a + (d.unsorted || 0), 0);
 
         return jsonResponse(res, 200, {
-          databases: result.databases,
-          totalSorted,
-          totalUnsorted,
+          tables: result.tables || [],
+          totalInSync: result.totalInSync || 0,
+          totalOutOfSync: result.totalOutOfSync || 0,
           emailsScanned: emails.length,
           summaryEmail: result.summaryEmail || ""
         });
@@ -68,23 +62,49 @@ async function handler(req, res) {
   serveStatic(req, res, url);
 }
 
-function callGroq(emailText, filterInstruction) {
+function callGroq(emailText, databaseFilter) {
+  const filterInstruction = databaseFilter
+    ? `Only return results for database: "${databaseFilter}".`
+    : "Return results for all databases found.";
+
   const payload = JSON.stringify({
     model: "llama-3.1-8b-instant",
-    max_tokens: 1000,
+    max_tokens: 2000,
     messages: [
       {
         role: "system",
-        content: `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
-SORTED keywords: sorted, indexed, ordered, organised, structured, partitioned
-UNSORTED keywords: unsorted, unindexed, unordered, unorganised, raw, unpartitioned
+        content: `You are a database sync monitoring assistant. Analyse Oracle GoldenGate sync check emails.
+
+These emails show replication sync status between source and target databases.
+- "NOT SYNC" in subject means tables are out of sync
+- "SYNC" in subject means tables are in sync
+- "Difference is there" means that table is OUT OF SYNC
+- Each block shows: table_name: source_count and target_name@target: target_count
+
 ${filterInstruction}
-Respond ONLY with valid JSON no markdown:
-{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}`
+
+Extract each table and its sync status. Respond ONLY with valid JSON:
+{
+  "sourceDB": "source database name",
+  "targetDB": "target database name",
+  "syncStatus": "NOT SYNC or SYNC",
+  "tables": [
+    {
+      "name": "table name",
+      "sourceCount": 0,
+      "targetCount": 0,
+      "difference": 0,
+      "inSync": false
+    }
+  ],
+  "totalInSync": 0,
+  "totalOutOfSync": 0,
+  "summaryEmail": "Subject: DB Sync Summary\\n\\nHi,\\n\\n..."
+}`
       },
       {
         role: "user",
-        content: `Analyse these emails:\n\n${emailText}`
+        content: `Analyse these sync check emails:\n\n${emailText}`
       }
     ]
   });
@@ -105,13 +125,11 @@ Respond ONLY with valid JSON no markdown:
       resNode.on("end", () => {
         try {
           const parsed = JSON.parse(data);
-          console.log("Full Groq response:", JSON.stringify(parsed));
           if (parsed.error) {
             reject(new Error("Groq error: " + parsed.error.message));
             return;
           }
-          const text = parsed.choices[0].message.content;
-          resolve(text);
+          resolve(parsed.choices[0].message.content);
         } catch (e) {
           reject(new Error("Failed to parse Groq response: " + data));
         }
