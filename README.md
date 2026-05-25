@@ -128,3 +128,4 @@ Word, Excel, and PowerPoint. Outlook support is in progress by Microsoft.
 The `copilotAgents` section in `manifest.json` and `declarativeAgent.json`
 are already configured — your add-in will automatically gain Copilot
 natural language capabilities in Outlook the moment Microsoft enables it.
+# updated
