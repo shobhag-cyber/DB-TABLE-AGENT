@@ -4,8 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = process.env.PORT || 3000;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
-const CLAUDE_MODEL = "claude-sonnet-4-20250514";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 
 async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,25 +42,12 @@ async function handler(req, res) {
           ? `Only return results for database: "${databaseFilter}".`
           : "Return results for all databases found.";
 
-        const claudeResp = await callClaude(emailText, filterInstruction);
-        console.log("Claude full response:", JSON.stringify(claudeResp));
+        const geminiResp = await callGemini(emailText, filterInstruction);
+        console.log("Gemini response:", geminiResp);
 
-        // Handle Claude API errors
-        if (claudeResp.error) {
-          return jsonResponse(res, 500, { error: "Claude API error: " + claudeResp.error.message });
-        }
-
-        if (!claudeResp.content || !Array.isArray(claudeResp.content)) {
-          return jsonResponse(res, 500, { error: "Unexpected Claude response: " + JSON.stringify(claudeResp) });
-        }
-
-        const raw = claudeResp.content
-          .map((b) => b.text || "")
-          .join("")
+        const raw = geminiResp
           .replace(/```json|```/g, "")
           .trim();
-
-        console.log("Raw Claude text:", raw);
 
         const result = JSON.parse(raw);
         const totalSorted = result.databases.reduce((a, d) => a + (d.sorted || 0), 0);
@@ -85,28 +71,28 @@ async function handler(req, res) {
   serveStatic(req, res, url);
 }
 
-function callClaude(emailText, filterInstruction) {
-  const payload = JSON.stringify({
-    model: CLAUDE_MODEL,
-    max_tokens: 1000,
-    system: `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
+function callGemini(emailText, filterInstruction) {
+  const prompt = `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
 SORTED keywords: sorted, indexed, ordered, organised, structured, partitioned
 UNSORTED keywords: unsorted, unindexed, unordered, unorganised, raw, unpartitioned
 ${filterInstruction}
 Respond ONLY with valid JSON no markdown:
-{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}`,
-    messages: [{ role: "user", content: `Analyse these emails:\n\n${emailText}` }],
+{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}
+
+Emails to analyse:
+${emailText}`;
+
+  const payload = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }]
   });
 
   return new Promise((resolve, reject) => {
     const reqNode = https.request({
-      hostname: "api.anthropic.com",
-      path: "/v1/messages",
+      hostname: "generativelanguage.googleapis.com",
+      path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
         "Content-Length": Buffer.byteLength(payload)
       },
     }, (resNode) => {
@@ -114,9 +100,12 @@ Respond ONLY with valid JSON no markdown:
       resNode.on("data", (chunk) => (data += chunk));
       resNode.on("end", () => {
         try {
-          resolve(JSON.parse(data));
+          const parsed = JSON.parse(data);
+          console.log("Full Gemini response:", JSON.stringify(parsed));
+          const text = parsed.candidates[0].content.parts[0].text;
+          resolve(text);
         } catch (e) {
-          reject(new Error("Failed to parse Claude response: " + data));
+          reject(new Error("Failed to parse Gemini response: " + data));
         }
       });
     });
