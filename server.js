@@ -89,7 +89,7 @@ ${emailText}`;
   return new Promise((resolve, reject) => {
     const reqNode = https.request({
       hostname: "generativelanguage.googleapis.com",
-      path: `/v1beta/models/gemini-1.5-flash-8b-latest:generateContent?key=${GEMINI_API_KEY}`,
+      path: `/v1/models/gemini-1.5-flash:generateContent:generateContent?key=${GEMINI_API_KEY}`,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
