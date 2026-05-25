@@ -44,7 +44,7 @@
           "id": "TaskPaneRuntime",
           "type": "general",
           "code": {
-            "page": "https://localhost:3000/taskpane.html"
+            "page": "https://organic-space-adventure-jj6q9r6j65r935jpr-3000.app.github.dev/"
           },
           "lifetime": "short",
           "actions": [

@@ -4,12 +4,12 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xsi:type="MailApp">
-  <Id>f47ac10b-58cc-4372-a567-0e02b2c3d479</Id>
+  <Id>dba81013-8885-4eb2-949a-a6e959793c8d</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>DB Table Agent</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="DB Table Agent"/>
-  <Description DefaultValue="Scans emails for database table reports."/>
+  <Description DefaultValue="Scans emails for database sync status reports."/>
   <IconUrl DefaultValue="https://db-table-agent.onrender.com/assets/color.png"/>
   <HighResolutionIconUrl DefaultValue="https://db-table-agent.onrender.com/assets/color.png"/>
   <SupportUrl DefaultValue="https://db-table-agent.onrender.com"/>
@@ -87,7 +87,7 @@
         <bt:String id="TaskpaneButton.Label" DefaultValue="Scan Emails"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Opens the DB Table Agent panel to scan your inbox."/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Scans inbox for GoldenGate sync status emails."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
