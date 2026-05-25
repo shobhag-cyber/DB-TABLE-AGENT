@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = process.env.PORT || 3000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
 async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -42,13 +42,10 @@ async function handler(req, res) {
           ? `Only return results for database: "${databaseFilter}".`
           : "Return results for all databases found.";
 
-        const geminiResp = await callGemini(emailText, filterInstruction);
-        console.log("Gemini response:", geminiResp);
+        const text = await callGroq(emailText, filterInstruction);
+        console.log("Groq response:", text);
 
-        const raw = geminiResp
-          .replace(/```json|```/g, "")
-          .trim();
-
+        const raw = text.replace(/```json|```/g, "").trim();
         const result = JSON.parse(raw);
         const totalSorted = result.databases.reduce((a, d) => a + (d.sorted || 0), 0);
         const totalUnsorted = result.databases.reduce((a, d) => a + (d.unsorted || 0), 0);
@@ -71,28 +68,35 @@ async function handler(req, res) {
   serveStatic(req, res, url);
 }
 
-function callGemini(emailText, filterInstruction) {
-  const prompt = `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
+function callGroq(emailText, filterInstruction) {
+  const payload = JSON.stringify({
+    model: "llama3-8b-8192",
+    max_tokens: 1000,
+    messages: [
+      {
+        role: "system",
+        content: `You are a database reporting assistant. Extract database sorted/unsorted table information from email content.
 SORTED keywords: sorted, indexed, ordered, organised, structured, partitioned
 UNSORTED keywords: unsorted, unindexed, unordered, unorganised, raw, unpartitioned
 ${filterInstruction}
 Respond ONLY with valid JSON no markdown:
-{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}
-
-Emails to analyse:
-${emailText}`;
-
-  const payload = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }]
+{"databases":[{"name":"db name","sorted":0,"unsorted":0,"source":"note"}],"summaryEmail":"Subject: DB Table Summary\\n\\nHi,..."}`
+      },
+      {
+        role: "user",
+        content: `Analyse these emails:\n\n${emailText}`
+      }
+    ]
   });
 
   return new Promise((resolve, reject) => {
     const reqNode = https.request({
-      hostname: "generativelanguage.googleapis.com",
-      path: `/v1/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+      hostname: "api.groq.com",
+      path: "/openai/v1/chat/completions",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Length": Buffer.byteLength(payload)
       },
     }, (resNode) => {
@@ -101,11 +105,15 @@ ${emailText}`;
       resNode.on("end", () => {
         try {
           const parsed = JSON.parse(data);
-          console.log("Full Gemini response:", JSON.stringify(parsed));
-          const text = parsed.candidates[0].content.parts[0].text;
+          console.log("Full Groq response:", JSON.stringify(parsed));
+          if (parsed.error) {
+            reject(new Error("Groq error: " + parsed.error.message));
+            return;
+          }
+          const text = parsed.choices[0].message.content;
           resolve(text);
         } catch (e) {
-          reject(new Error("Failed to parse Gemini response: " + data));
+          reject(new Error("Failed to parse Groq response: " + data));
         }
       });
     });
@@ -151,4 +159,3 @@ function jsonResponse(res, status, data) {
 http.createServer(handler).listen(PORT, () => {
   console.log(`\n✅ DB Table Agent running on port ${PORT}`);
 });
- 
